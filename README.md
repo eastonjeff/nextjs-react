@@ -4,7 +4,7 @@ This project is for exploring Next.js & React + Tailwind CSS!
 
 For components, it will use Shadcn UI [based on Base UI (@base-ui/react)]: https://ui.shadcn.com/docs/components
 
-It will eventually integrate into with dotnet minimal API project. 
+It will eventually integrate with the dotnet minimal API project. 
 
 ## Getting Started
 

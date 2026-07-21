@@ -42,6 +42,10 @@ export default function Customers() {
 
   const [data, setData] = useState<Customer[]>([]);
 
+  //TODO: add state for filtering & searching parameters
+  //TODO: add state for data loading boolean
+  //TODO: capture total records from API response to know how many pages are available
+
   //runs once the component has been rendered (similar to onMounted in Vue
   //last arguement of the useEffect function ([]) can be used like a Vue watcher for multiple fields
   useEffect(() => {

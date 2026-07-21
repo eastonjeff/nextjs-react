@@ -5,7 +5,9 @@ import {
     flexRender,
     getCoreRowModel,
     useReactTable,
-    getPaginationRowModel
+    getPaginationRowModel,
+    OnChangeFn,
+    PaginationState
 } from "@tanstack/react-table"
 
 import {
@@ -21,16 +23,21 @@ import { Button } from "@/components/ui/button"
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
-    data: TData[]
+    data: TData[],
+    onPaginationChanged: OnChangeFn<PaginationState>
 }
 
 export function DataTable<TData, TValue>({
     columns,
     data,
+    onPaginationChanged
 }: DataTableProps<TData, TValue>) {
+
+    //base table model that shadcn wraps
     const table = useReactTable({
         data,
         columns,
+        onPaginationChange: onPaginationChanged,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel()
     })

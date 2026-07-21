@@ -1,9 +1,12 @@
+"use client"
+
 import { DataTable } from "@/components/ui/data-table";
 import { Customer } from "@/lib/api/models/customer.dto";
 import { GetCustomersQuery } from "@/lib/api/models/customer.query";
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, OnChangeFn, PaginationState } from "@tanstack/react-table";
+import { useEffect, useState } from "react";
 
-async function GetCustomers(query:GetCustomersQuery): Promise<Customer[]> {
+async function GetCustomers(query: GetCustomersQuery): Promise<Customer[]> {
   //TODO: replace with call to API service
   return [
     {
@@ -14,7 +17,7 @@ async function GetCustomers(query:GetCustomersQuery): Promise<Customer[]> {
   ]
 }
 
-const columns:ColumnDef<Customer>[] = [
+const columns: ColumnDef<Customer>[] = [
   {
     "accessorKey": "id",
     "header": "Id"
@@ -29,13 +32,28 @@ const columns:ColumnDef<Customer>[] = [
   }
 ]
 
-export default async function Customers() {
-  
-  const data = await GetCustomers({ pageNumber: 1, pageSize: 10 });
+const handlePaginationChange: OnChangeFn<PaginationState> = (updater) => {
+  //server side pagination hook
+  const nextPagination = updater as PaginationState;
+  console.log(nextPagination.pageIndex, nextPagination.pageSize);
+};
+
+export default function Customers() {
+
+  const [data, setData] = useState<Customer[]>([]);
+
+  //runs once the component has been rendered (similar to onMounted in Vue
+  //last arguement of the useEffect function ([]) can be used like a Vue watcher for multiple fields
+  useEffect(() => {
+    GetCustomers({ pageNumber: 1, pageSize: 10 }).then(setData);
+  }, []);
 
   return (
     <div className="container mx-auto py-10">
-      <DataTable columns={columns} data={data} />
+      <DataTable
+        onPaginationChanged={handlePaginationChange}
+        columns={columns}
+        data={data} />
     </div>
   );
 }

@@ -2,19 +2,14 @@
 
 import { DataTable } from "@/components/ui/data-table";
 import { Customer } from "@/lib/api/models/customer.dto";
-import { GetCustomersQuery } from "@/lib/api/models/customer.query";
+import { GetCustomersQuery, GetCustomersResponse } from "@/lib/api/models/customer.query";
 import { ColumnDef, OnChangeFn, PaginationState } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
+import { getCustomers } from "@/lib/api/customers.api";
 
-async function GetCustomers(query: GetCustomersQuery): Promise<Customer[]> {
-  //TODO: replace with call to API service
-  return [
-    {
-      id: 1,
-      firstName: "Jeff",
-      lastName: "Easton"
-    }
-  ]
+async function GetCustomers(query: GetCustomersQuery): Promise<GetCustomersResponse> {
+  const response = await getCustomers(query);
+  return response;
 }
 
 const columns: ColumnDef<Customer>[] = [
@@ -33,23 +28,22 @@ const columns: ColumnDef<Customer>[] = [
 ]
 
 const handlePaginationChange: OnChangeFn<PaginationState> = (updater) => {
-  //server side pagination hook
   const nextPagination = updater as PaginationState;
   console.log(nextPagination.pageIndex, nextPagination.pageSize);
 };
 
 export default function Customers() {
 
-  const [data, setData] = useState<Customer[]>([]);
+  const [data, setData] = useState<GetCustomersResponse>();
 
   //TODO: add state for filtering & searching parameters
   //TODO: add state for data loading boolean
-  //TODO: capture total records from API response to know how many pages are available
 
   //runs once the component has been rendered (similar to onMounted in Vue
   //last arguement of the useEffect function ([]) can be used like a Vue watcher for multiple fields
   useEffect(() => {
-    GetCustomers({ pageNumber: 1, pageSize: 10 }).then(setData);
+    GetCustomers({ pageNumber: 1, pageSize: 10 })
+      .then(x => setData(x));
   }, []);
 
   return (
@@ -57,7 +51,7 @@ export default function Customers() {
       <DataTable
         onPaginationChanged={handlePaginationChange}
         columns={columns}
-        data={data} />
+        data={data?.customers || []} />
     </div>
   );
 }

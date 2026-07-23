@@ -5,7 +5,7 @@ import { Customer } from "@/lib/api/models/customer.dto";
 import { GetCustomersQuery, GetCustomersResponse } from "@/lib/api/models/customer.query";
 import { ColumnDef, OnChangeFn, PaginationState } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
-import { getCustomers } from "@/lib/api/customers.api";
+import { getCustomers } from "@/lib/api/entities/customers.api";
 
 async function GetCustomers(query: GetCustomersQuery): Promise<GetCustomersResponse> {
   const response = await getCustomers(query);

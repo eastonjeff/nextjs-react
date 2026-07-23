@@ -1,4 +1,4 @@
-import { GetCustomersQuery, GetCustomersResponse } from "./models/customer.query";
+import { GetCustomersQuery, GetCustomersResponse } from "../models/customer.query";
 import { apiClient } from "@/lib/api/api.client";
 
 export async function getCustomers(query:GetCustomersQuery): Promise<GetCustomersResponse> {

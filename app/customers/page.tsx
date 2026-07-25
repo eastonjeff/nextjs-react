@@ -6,11 +6,9 @@ import { GetCustomersQuery, GetCustomersResponse } from "@/lib/api/models/custom
 import { ColumnDef, OnChangeFn, PaginationState } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
 import { getCustomers } from "@/lib/api/entities/customers.api";
-
-async function GetCustomers(query: GetCustomersQuery): Promise<GetCustomersResponse> {
-  const response = await getCustomers(query);
-  return response;
-}
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import Link from "next/link";
 
 const columns: ColumnDef<Customer>[] = [
   {
@@ -27,31 +25,94 @@ const columns: ColumnDef<Customer>[] = [
   }
 ]
 
-const handlePaginationChange: OnChangeFn<PaginationState> = (updater) => {
-  const nextPagination = updater as PaginationState;
-  console.log(nextPagination.pageIndex, nextPagination.pageSize);
-};
-
 export default function Customers() {
 
-  const [data, setData] = useState<GetCustomersResponse>();
+  const [customerData, setCustomerData] = useState<GetCustomersResponse>({ customers: [], total: 0 });
+  const [paginationData, setPaginationData] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
+  const [idFilter, setIdFilter] = useState("");
+  const [firstNameFilter, setFirstNameFilter] = useState("");
+  const [lastNameFilter, setLastNameFilter] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  //TODO: add state for filtering & searching parameters
-  //TODO: add state for data loading boolean
+  async function loadCustomers(): Promise<void> {
+    setLoading(true);
+    //API call min 1 seconds so I can see the loading indicator
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const query = getCustomerQuery();
+    const response = await getCustomers(query);
+    setCustomerData(response);
+    setLoading(false);
+  }
 
-  //runs once the component has been rendered (similar to onMounted in Vue
-  //last arguement of the useEffect function ([]) can be used like a Vue watcher for multiple fields
+  const handlePaginationChange: OnChangeFn<PaginationState> = (updater) => {
+    setPaginationData((prev) => {
+      const nextPagination = typeof updater === "function" ? updater(prev) : updater;
+      return nextPagination;
+    });
+  };
+
+  function getCustomerQuery(): GetCustomersQuery {
+    let id:number|undefined = parseInt(idFilter);
+    id = isNaN(id) ? undefined : id;
+    return {
+      id: id,
+      firstName: firstNameFilter,
+      lastName: lastNameFilter,
+      pageNumber: paginationData.pageIndex + 1, //api is not zero based
+      pageSize: paginationData.pageSize
+    }
+  }
+
   useEffect(() => {
-    GetCustomers({ pageNumber: 1, pageSize: 10 })
-      .then(x => setData(x));
-  }, []);
+    loadCustomers();
+  }, [paginationData.pageIndex, paginationData.pageSize]);
 
   return (
     <div className="container mx-auto py-10">
+
+      <h1 className="text-2xl font-semibold mb-2">Search Customers</h1>
+      <Link href="/" className="text-sm mb-4 inline-block">
+        ← Back to home
+      </Link>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3 mb-5">
+
+        <Input
+          type="number"
+          placeholder="Id"
+          value={idFilter}
+          onChange={(e) => setIdFilter(e.target.value)}></Input>
+
+        <Input 
+          type="text" 
+          placeholder="First Name"
+          value={firstNameFilter}
+          onChange={(e) => setFirstNameFilter(e.target.value)}></Input>
+
+        <Input 
+          type="text" 
+          placeholder="Last Name"
+          value={lastNameFilter}
+          onChange={(e) => setLastNameFilter(e.target.value)}></Input>
+
+      </div>
+
+      <Button
+        size="sm"
+        className="mb-5"
+        onClick={() => loadCustomers()}
+      >
+        Search
+      </Button>
+
       <DataTable
         onPaginationChanged={handlePaginationChange}
+        pagination={paginationData}
         columns={columns}
-        data={data?.customers || []} />
-    </div>
+        loading={loading}
+        total={customerData?.total || 0}
+        data={customerData?.customers || []} />
+
+    </div >
   );
 }

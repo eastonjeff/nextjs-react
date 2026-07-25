@@ -10,7 +10,13 @@ https://base-ui.com/
 
 It will eventually integrate with the dotnet minimal API project. 
 
-## Getting Started
+## Icons
+
+Lucide React
+
+https://lucide.dev/icons/
+
+# Getting Started
 
 Install modules:
 

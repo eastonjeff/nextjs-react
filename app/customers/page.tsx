@@ -8,22 +8,8 @@ import { useEffect, useState } from "react";
 import { getCustomers } from "@/lib/api/entities/customers.api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
-
-const columns: ColumnDef<Customer>[] = [
-  {
-    "accessorKey": "id",
-    "header": "Id"
-  },
-  {
-    "accessorKey": "firstName",
-    "header": "First Name"
-  },
-  {
-    "accessorKey": "lastName",
-    "header": "Last Name"
-  }
-]
 
 export default function Customers() {
 
@@ -33,6 +19,43 @@ export default function Customers() {
   const [firstNameFilter, setFirstNameFilter] = useState("");
   const [lastNameFilter, setLastNameFilter] = useState("");
   const [loading, setLoading] = useState(true);
+
+  const columns: ColumnDef<Customer>[] = [
+    {
+      "accessorKey": "id",
+      "header": "Id"
+    },
+    {
+      "accessorKey": "firstName",
+      "header": "First Name"
+    },
+    {
+      "accessorKey": "lastName",
+      "header": "Last Name"
+    },
+    {
+      "header": "Action",
+      "accessorKey": "actions",
+      "cell": ({ row }) => {
+        return (<div>
+          <Button
+            className="cursor-pointer"
+            size={"icon"}
+            variant={"ghost"}
+            onClick={() => console.log(row.original.id + " edit")}>
+            <Pencil></Pencil>
+          </Button>
+          <Button
+            className="cursor-pointer"
+            size={"icon"}
+            variant={"ghost"}
+            onClick={() => console.log(row.original.id + " delete")}>
+            <Trash2></Trash2>
+          </Button>
+        </div>)
+      }
+    }
+  ]
 
   async function loadCustomers(): Promise<void> {
     setLoading(true);
@@ -52,7 +75,7 @@ export default function Customers() {
   };
 
   function getCustomerQuery(): GetCustomersQuery {
-    let id:number|undefined = parseInt(idFilter);
+    let id: number | undefined = parseInt(idFilter);
     id = isNaN(id) ? undefined : id;
     return {
       id: id,
@@ -83,14 +106,14 @@ export default function Customers() {
           value={idFilter}
           onChange={(e) => setIdFilter(e.target.value)}></Input>
 
-        <Input 
-          type="text" 
+        <Input
+          type="text"
           placeholder="First Name"
           value={firstNameFilter}
           onChange={(e) => setFirstNameFilter(e.target.value)}></Input>
 
-        <Input 
-          type="text" 
+        <Input
+          type="text"
           placeholder="Last Name"
           value={lastNameFilter}
           onChange={(e) => setLastNameFilter(e.target.value)}></Input>

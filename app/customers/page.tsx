@@ -1,13 +1,13 @@
 "use client"
 
-import { DataTable } from "@/components/ui/data-table";
+import { DataTable } from "@/components/ui/DataTable";
 import { Customer } from "@/lib/api/models/customer.dto";
 import { GetCustomersQuery, GetCustomersResponse } from "@/lib/api/models/customer.query";
 import { ColumnDef, OnChangeFn, PaginationState } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
 import { getCustomers } from "@/lib/api/entities/customers.api";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 

@@ -17,9 +17,9 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/Table"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/Button"
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -89,7 +89,7 @@ export function DataTable<TData, TValue>({
                                     table.getRowModel().rows.map((row) => (
                                         <TableRow
                                             key={row.id}
-                                            data-state={row.getIsSelected() && "selected"}
+                                            data-state={row.getIsSelected() && "s1elected"}
                                         >
                                             {row.getVisibleCells().map((cell) => (
                                                 <TableCell key={cell.id}>

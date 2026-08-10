@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/Button";
 import {
   UserGroupIcon
 } from '@heroicons/react/24/outline';

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
+import CustomerDialog from "@/components/customers/CustomerDialog";
 
 export default function Customers() {
 
@@ -19,6 +20,11 @@ export default function Customers() {
   const [firstNameFilter, setFirstNameFilter] = useState("");
   const [lastNameFilter, setLastNameFilter] = useState("");
   const [loading, setLoading] = useState(true);
+
+  //dialog state
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   const columns: ColumnDef<Customer>[] = [
     {
@@ -42,7 +48,11 @@ export default function Customers() {
             className="cursor-pointer"
             size={"icon"}
             variant={"ghost"}
-            onClick={() => console.log(row.original.id + " edit")}>
+            onClick={() => {
+              setSelectedCustomer(row.original);
+              setIsEditMode(true);
+              setIsDialogOpen(true);
+            }}>
             <Pencil></Pencil>
           </Button>
           <Button
@@ -84,6 +94,20 @@ export default function Customers() {
       pageNumber: paginationData.pageIndex + 1, //api is not zero based
       pageSize: paginationData.pageSize
     }
+  }
+
+  async function saveCustomer(customer: Customer): Promise<void> {
+    //API call min 1 seconds so I can see the loading indicator
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    console.log("Saving customer: ", customer);
+    //TODO: call API to save customer
+    setIsDialogOpen(false);
+    //TODO: show notification that customer was saved
+    //TODO: update the table with the new customer data, either by reloading or updating the state
+  }
+
+  function handleDialogOpenChange(open: boolean) {
+    setIsDialogOpen(open);
   }
 
   useEffect(() => {
@@ -135,6 +159,14 @@ export default function Customers() {
         loading={loading}
         total={customerData?.total || 0}
         data={customerData?.customers || []} />
+
+      <CustomerDialog 
+        customer={selectedCustomer}
+        isEditMode={isEditMode}
+        visible={isDialogOpen}
+        onOpenChange={handleDialogOpenChange}
+        onSave={saveCustomer}
+      />
 
     </div >
   );

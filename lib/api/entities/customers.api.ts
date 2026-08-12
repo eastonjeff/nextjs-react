@@ -1,3 +1,4 @@
+import { Customer } from "../models/customer.dto";
 import { GetCustomersQuery, GetCustomersResponse } from "../models/customer.query";
 import { apiClient } from "@/lib/api/api.client";
 
@@ -9,4 +10,30 @@ export async function getCustomers(query:GetCustomersQuery): Promise<GetCustomer
     })
 
     return customers;
+}
+
+export async function deleteCustomer(id: string): Promise<void> {
+    await apiClient<void>(`customer/${id}`, {
+        method: "DELETE"
+    })
+}
+
+export async function createCustomer(customer: Customer): Promise<Customer> {
+    
+    const res = await apiClient<Customer>("customer", {
+        method: "POST",
+        body: JSON.stringify(customer)
+    });
+
+    return res;
+}
+
+export async function updateCustomer(customer: Customer): Promise<Customer> {
+
+    const res = await apiClient<Customer>(`customer`, {
+        method: "PUT",
+        body: JSON.stringify(customer)
+    });
+
+    return res;
 }

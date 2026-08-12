@@ -5,12 +5,13 @@ import { Customer } from "@/lib/api/models/customer.dto";
 import { GetCustomersQuery, GetCustomersResponse } from "@/lib/api/models/customer.query";
 import { ColumnDef, OnChangeFn, PaginationState } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
-import { getCustomers } from "@/lib/api/entities/customers.api";
+import { getCustomers, updateCustomer } from "@/lib/api/entities/customers.api";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import CustomerDialog from "@/components/customers/CustomerDialog";
+import { toast } from "@/components/ui/Toast";
 
 export default function Customers() {
 
@@ -96,14 +97,43 @@ export default function Customers() {
     }
   }
 
+  function showToast(action: string, customer: Customer, success: boolean) {
+    const id = toast.add({
+      title: `Customer ${customer.id}`,
+      description: `Customer ${customer.firstName} ${customer.lastName} was ${action} ` + (success ? "successfully" : "failed"),
+      type: success ? "success" : "error",
+      actionProps: {
+        onClick() {
+          toast.close(id)
+        }
+      },
+    })
+  }
+
   async function saveCustomer(customer: Customer): Promise<void> {
-    //API call min 1 seconds so I can see the loading indicator
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    console.log("Saving customer: ", customer);
-    //TODO: call API to save customer
-    setIsDialogOpen(false);
-    //TODO: show notification that customer was saved
-    //TODO: update the table with the new customer data, either by reloading or updating the state
+    //console.log("Saving customer: ", customer);
+    try {
+      var customer = await updateCustomer(customer);
+      setIsDialogOpen(false);
+      showToast("saved", customer, true);
+      //update the selected customer in the table without reloading the whole table
+      if (selectedCustomer == null) {
+        console.error("Selected customer is null, cannot update the table");
+        return;
+      }
+      setSelectedCustomer(customer);
+      //replace the customer in the table with the updated customer
+      setCustomerData(prev => ({
+        ...prev,
+        customers: prev.customers.map(row =>
+          row.id === customer.id ? customer : row
+        ),
+      }));
+    }
+    catch (error) {
+      console.error("Error saving customer: ", error);
+      showToast("saved", customer, false);
+    }
   }
 
   function handleDialogOpenChange(open: boolean) {
@@ -160,7 +190,7 @@ export default function Customers() {
         total={customerData?.total || 0}
         data={customerData?.customers || []} />
 
-      <CustomerDialog 
+      <CustomerDialog
         customer={selectedCustomer}
         isEditMode={isEditMode}
         visible={isDialogOpen}
@@ -171,3 +201,4 @@ export default function Customers() {
     </div >
   );
 }
+

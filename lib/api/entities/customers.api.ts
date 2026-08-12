@@ -12,13 +12,13 @@ export async function getCustomers(query:GetCustomersQuery): Promise<GetCustomer
     return customers;
 }
 
-export async function deleteCustomer(id: string): Promise<void> {
+export async function deleteCustomer(id: number): Promise<void> {
     await apiClient<void>(`customer/${id}`, {
         method: "DELETE"
     })
 }
 
-export async function createCustomer(customer: Customer): Promise<Customer> {
+export async function postCustomer(customer: Customer): Promise<Customer> {
     
     const res = await apiClient<Customer>("customer", {
         method: "POST",
@@ -28,7 +28,7 @@ export async function createCustomer(customer: Customer): Promise<Customer> {
     return res;
 }
 
-export async function updateCustomer(customer: Customer): Promise<Customer> {
+export async function putCustomer(customer: Customer): Promise<Customer> {
 
     const res = await apiClient<Customer>(`customer`, {
         method: "PUT",

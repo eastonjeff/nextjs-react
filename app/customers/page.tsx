@@ -5,13 +5,14 @@ import { Customer } from "@/lib/api/models/customer.dto";
 import { GetCustomersQuery, GetCustomersResponse } from "@/lib/api/models/customer.query";
 import { ColumnDef, OnChangeFn, PaginationState } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
-import { getCustomers, updateCustomer } from "@/lib/api/entities/customers.api";
+import { getCustomers, postCustomer, putCustomer, deleteCustomer } from "@/lib/api/entities/customers.api";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import CustomerDialog from "@/components/customers/CustomerDialog";
 import { toast } from "@/components/ui/Toast";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/AlertDialog";
 
 export default function Customers() {
 
@@ -26,6 +27,8 @@ export default function Customers() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
+
 
   const columns: ColumnDef<Customer>[] = [
     {
@@ -56,13 +59,18 @@ export default function Customers() {
             }}>
             <Pencil></Pencil>
           </Button>
-          <Button
+           <Button
             className="cursor-pointer"
             size={"icon"}
             variant={"ghost"}
-            onClick={() => console.log(row.original.id + " delete")}>
+            onClick={() => {
+              setSelectedCustomer(row.original);
+              setDeleteAlertOpen(true);
+            }}
+            >
             <Trash2></Trash2>
           </Button>
+
         </div>)
       }
     }
@@ -110,10 +118,37 @@ export default function Customers() {
     })
   }
 
+  async function removeCustomer(customer:Customer): Promise<void> {
+    try {
+      await deleteCustomer(customer.id);
+      setDeleteAlertOpen(false);
+      showToast("deleted", customer, true);
+      //remove the customer from the table without reloading the whole table
+      setCustomerData(prev => ({
+        ...prev,
+        customers: prev.customers.filter(row => row.id !== customer.id),
+        total: prev.total - 1,
+      }));
+    }
+    catch (error) {
+      console.error("Error deleting customer: ", error);
+      showToast("deleted", customer, false);
+    }
+  }
+
   async function saveCustomer(customer: Customer): Promise<void> {
     //console.log("Saving customer: ", customer);
+    if (isEditMode) {
+      await updateCustomer(customer);
+    }
+    else {
+      await createCustomer(customer);
+    }
+  }
+
+  async function updateCustomer(customer: Customer) {
     try {
-      var customer = await updateCustomer(customer);
+      var customer = await putCustomer(customer);
       setIsDialogOpen(false);
       showToast("saved", customer, true);
       //update the selected customer in the table without reloading the whole table
@@ -133,6 +168,24 @@ export default function Customers() {
     catch (error) {
       console.error("Error saving customer: ", error);
       showToast("saved", customer, false);
+    }
+  }
+
+  async function createCustomer(customer: Customer) {
+    try {
+      var customer = await postCustomer(customer);
+      setIsDialogOpen(false);
+      showToast("created", customer, true);
+      //add the customer to the table without reloading the whole table
+      setCustomerData(prev => ({
+        ...prev,
+        customers: [customer, ...prev.customers],
+        total: prev.total + 1,
+      }));
+    }
+    catch (error) {
+      console.error("Error creating customer: ", error);
+      showToast("created", customer, false);
     }
   }
 
@@ -197,6 +250,28 @@ export default function Customers() {
         onOpenChange={handleDialogOpenChange}
         onSave={saveCustomer}
       />
+
+      <AlertDialog open={deleteAlertOpen} onOpenChange={setDeleteAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this customer?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your account
+              from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={async () => {
+              if(selectedCustomer == null) {
+                console.error("Selected customer is null, cannot delete");
+                return;
+              }
+              await removeCustomer(selectedCustomer);
+            }}>Continue</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
     </div >
   );

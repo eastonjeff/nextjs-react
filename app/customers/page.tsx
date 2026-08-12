@@ -13,6 +13,7 @@ import Link from "next/link";
 import CustomerDialog from "@/components/customers/CustomerDialog";
 import { toast } from "@/components/ui/Toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/AlertDialog";
+import { Search, Plus } from "lucide-react";
 
 export default function Customers() {
 
@@ -232,7 +233,19 @@ export default function Customers() {
         className="mb-5"
         onClick={() => loadCustomers()}
       >
-        Search
+        <Search className="h-4 w-4" />
+      </Button>
+
+      <Button
+        size="sm"
+        className="mb-5"
+        onClick={() => {
+          setSelectedCustomer({ id: 0, firstName: "", lastName: ""} as Customer);
+          setIsEditMode(false);
+          setIsDialogOpen(true);
+        }}
+      >
+        <Plus className="h-4 w-4" />
       </Button>
 
       <DataTable
